@@ -1,0 +1,16 @@
+{
+  "llm_providers": {
+    "front_model": {
+      "base_url": "https://api.openai.com/v1",
+      "model": "gpt-5.2",
+      "api_key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "context_window": 200000
+    },
+    "back_model": {
+      "base_url": "https://api.openai.com/v1",
+      "model": "gpt-4o-mini",
+      "api_key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "context_window": 128000
+    }
+  }
+}
