@@ -198,9 +198,14 @@ export function streamThreadRun({
     callback?.()
   }
 
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`
+  }
+
   fetchEventSource(`${BASE}/conversation/${threadId}/message`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({query, parent_message_id: parentMessageId ?? '' }),
     signal: ctrl.signal,
     onmessage(ev) {
