@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin/binding"
 	"github.com/liyue201/tian-niu/pkg/agent"
+	"github.com/liyue201/tian-niu/pkg/auth"
 	"github.com/liyue201/tian-niu/pkg/repository"
 	"github.com/liyue201/tian-niu/pkg/service"
 	"github.com/liyue201/tian-niu/pkg/shared/log"
@@ -36,16 +38,54 @@ func NewServer(addr string, db *repository.Repository, agent *agent.Agent) *Serv
 }
 
 func (s *Server) setupRouter(g *gin.Engine) {
-
 	api := g.Group("/api")
+
+	// Public routes (no authentication required)
 	api.POST("/user/register", s.register)
 	api.POST("/user/login", s.login)
-	api.POST("/conversation", s.createConversation)
-	api.GET("/conversation", s.listConversations)
-	api.PATCH("/conversation/:conversation_id", s.renameConversation)
-	api.DELETE("/conversation/:conversation_id", s.deleteConversation)
-	api.POST("/conversation/:conversation_id/message", s.createMessage)
-	api.GET("/conversation/:conversation_id/message", s.listMessages)
+
+	// Protected routes (require JWT authentication)
+	protected := api.Group("/")
+	protected.Use(jwtMiddleware())
+	protected.POST("/conversation", s.createConversation)
+	protected.GET("/conversation", s.listConversations)
+	protected.PATCH("/conversation/:conversation_id", s.renameConversation)
+	protected.DELETE("/conversation/:conversation_id", s.deleteConversation)
+	protected.POST("/conversation/:conversation_id/message", s.createMessage)
+	protected.GET("/conversation/:conversation_id/message", s.listMessages)
+}
+
+// jwtMiddleware is a Gin middleware to validate JWT tokens
+func jwtMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "Authorization header is required"})
+			c.Abort()
+			return
+		}
+
+		// Bearer token format: "Bearer <token>"
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "Invalid authorization format"})
+			c.Abort()
+			return
+		}
+
+		tokenString := parts[1]
+		claims, err := auth.ParseToken(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "Invalid or expired token"})
+			c.Abort()
+			return
+		}
+
+		// Set user info to context
+		c.Set("userID", claims["user_id"])
+		c.Set("username", claims["username"])
+		c.Next()
+	}
 }
 
 func (s *Server) Run() {

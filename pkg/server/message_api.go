@@ -31,6 +31,9 @@ func (s *Server) createMessage(c *gin.Context) {
 		return
 	}
 
+	userId := c.MustGet("userID").(string)
+	req.UserID = userId
+
 	eventCh := make(chan vo.SSEMessageVO, 64)
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")

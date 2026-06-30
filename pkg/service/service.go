@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/liyue201/tian-niu/pkg/auth"
@@ -118,12 +119,16 @@ func (s *Service) ListConversations(userID string) ([]vo.ConversationVO, error) 
 	return result, nil
 }
 
-func (s *Service) RenameConversation(conversationID string, title string) (vo.ConversationVO, error) {
+func (s *Service) RenameConversation(userId, conversationID string, title string) (vo.ConversationVO, error) {
 
 	conv, err := s.db.GetConversationByID(conversationID)
 	if err != nil {
 		return vo.ConversationVO{}, err
 	}
+	if conv.UserID != userId {
+		return vo.ConversationVO{}, errors.New("user_id must match the one in the token")
+	}
+
 	conv.Title = title
 	if err := s.db.UpdateConversationTitle(conv); err != nil {
 		return vo.ConversationVO{}, err
@@ -137,11 +142,15 @@ func (s *Service) RenameConversation(conversationID string, title string) (vo.Co
 	}, nil
 }
 
-func (s *Service) DeleteConversation(conversationID string) error {
+func (s *Service) DeleteConversation(userId, conversationID string) error {
 	conv, err := s.db.GetConversationByID(conversationID)
 	if err != nil {
 		return err
 	}
+	if conv.UserID != userId {
+		return errors.New("user_id must match the one in the token")
+	}
+
 	if err := s.db.Delete(conv); err != nil {
 		return err
 	}
@@ -174,9 +183,12 @@ func (s *Service) ListMessages(conversationID string) ([]vo.ChatMessageVO, error
 // CreateMessage validates conversation, builds history, saves message record, and starts agent streaming execution.
 func (s *Service) CreateMessage(ctx context.Context, conversationID string, req vo.CreateMessageReq, voCh chan<- vo.SSEMessageVO) error {
 	// Validate conversation exists
-	_, err := s.db.GetConversationByID(conversationID)
+	conv, err := s.db.GetConversationByID(conversationID)
 	if err != nil {
 		return err
+	}
+	if conv.UserID != req.UserID {
+		return errors.New("user_id must match the one in the token")
 	}
 
 	// Build history from previous messages

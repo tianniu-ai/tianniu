@@ -12,6 +12,7 @@ func (s *Server) createConversation(c *gin.Context) {
 		respondError(c, StatusInvalidParam, err)
 		return
 	}
+	req.UserID = c.MustGet("userID").(string)
 
 	result, err := s.svc.CreateConversation(req)
 	if err != nil {
@@ -24,8 +25,7 @@ func (s *Server) createConversation(c *gin.Context) {
 
 // GET /conversation
 func (s *Server) listConversations(c *gin.Context) {
-	userID := c.Query("user_id")
-
+	userID := c.MustGet("userID").(string)
 	result, err := s.svc.ListConversations(userID)
 	if err != nil {
 		respondError(c, StatusInternalServerError, err)
@@ -45,7 +45,9 @@ func (s *Server) renameConversation(c *gin.Context) {
 		return
 	}
 
-	result, err := s.svc.RenameConversation(conversationID, req.Title)
+	userId := c.MustGet("userID").(string)
+
+	result, err := s.svc.RenameConversation(userId, conversationID, req.Title)
 	if err != nil {
 		respondError(c, StatusInternalServerError, err)
 		return
@@ -57,8 +59,9 @@ func (s *Server) renameConversation(c *gin.Context) {
 // DELETE /conversation/:conversation_id
 func (s *Server) deleteConversation(c *gin.Context) {
 	conversationID := c.Param("conversation_id")
+	userId := c.MustGet("userID").(string)
 
-	if err := s.svc.DeleteConversation(conversationID); err != nil {
+	if err := s.svc.DeleteConversation(userId, conversationID); err != nil {
 		respondError(c, StatusInternalServerError, err)
 		return
 	}

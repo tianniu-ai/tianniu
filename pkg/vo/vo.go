@@ -9,8 +9,8 @@ type R struct {
 
 // CreateConversationReq POST /conversation request body
 type CreateConversationReq struct {
-	UserID string `json:"user_id" binding:"required"`
-	Title  string `json:"title"`
+	UserID string `json:"user_id"`
+	Title  string `json:"title"  binding:"required"`
 }
 
 // UpdateConversationReq PATCH /conversation/{id} request body
@@ -20,7 +20,7 @@ type UpdateConversationReq struct {
 
 // CreateMessageReq POST /conversation/{id}/message request body
 type CreateMessageReq struct {
-	UserID          string `json:"user_id" binding:"required"`
+	UserID          string `json:"user_id""`
 	Query           string `json:"query" binding:"required"`
 	ParentMessageID string `json:"parent_message_id"`
 }
