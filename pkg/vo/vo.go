@@ -51,7 +51,7 @@ type ToolCallVO struct {
 
 // ChatMessageVO GET /conversation/{id}/message list item
 type ChatMessageVO struct {
-	MessageID       string           `json:"message_id"`
+	MessageID       string           `json:"id"`
 	ConversationID  string           `json:"conversation_id"`
 	ParentMessageID string           `json:"parent_message_id"`
 	Query           string           `json:"query"`

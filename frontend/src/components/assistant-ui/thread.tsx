@@ -105,10 +105,17 @@ export default function AssistantThread() {
 }
 
 function buildHistoryRepository(history: ChatMessageVO[]): ExportedMessageRepository {
+  const sorted = [...history].sort((a, b) => a.created_at - b.created_at)
   const messages: ExportedMessageRepository['messages'] = []
+  const knownAssistantIds = new Set<string>()
 
-  for (const item of history) {
+  for (const item of sorted) {
     const userMessageId = toUserMessageId(item.id)
+    const userParentId =
+      item.parent_message_id && knownAssistantIds.has(item.parent_message_id)
+        ? item.parent_message_id
+        : null
+
     const userMessage: ThreadUserMessage = {
       id: userMessageId,
       role: 'user',
@@ -138,17 +145,20 @@ function buildHistoryRepository(history: ChatMessageVO[]): ExportedMessageReposi
     }
 
     messages.push({
-      parentId: item.parent_message_id || null,
+      parentId: userParentId,
       message: userMessage,
     })
     messages.push({
       parentId: userMessageId,
       message: assistantMessage,
     })
+
+    knownAssistantIds.add(item.id)
   }
 
+  const lastItem = sorted[sorted.length - 1]
   return {
-    headId: history.length > 0 ? history[history.length - 1]?.id ?? null : null,
+    headId: lastItem?.id ?? null,
     messages,
   }
 }

@@ -9,7 +9,7 @@ const (
 )
 
 type SSEMessageVO struct {
-	MessageID        string  `json:"message_id"`
+	MessageID        string  `json:"id"`
 	Event            string  `json:"event"`
 	Content          *string `json:"content,omitempty"`
 	ReasoningContent *string `json:"reasoning_content,omitempty"`
