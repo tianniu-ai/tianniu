@@ -6,5 +6,12 @@
       "api_key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       "context_window": 200000
     }
+  },
+  "bash_tool": {
+    "timeout_seconds": 30,
+    "max_output_kb": 64,
+    "work_dir": "",
+    "disabled": false,
+    "allow_dangerous": false
   }
 }

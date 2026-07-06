@@ -9,6 +9,15 @@ type AppConfig struct {
 	LLMProviders struct {
 		FrontModel ModelConfig `json:"front_model"`
 	} `json:"llm_providers"`
+	BashTool BashToolConfig `json:"bash_tool"`
+}
+
+type BashToolConfig struct {
+	TimeoutSeconds int    `json:"timeout_seconds"`
+	MaxOutputKB    int    `json:"max_output_kb"`
+	WorkDir        string `json:"work_dir"`
+	Disabled       bool   `json:"disabled"`
+	AllowDangerous bool   `json:"allow_dangerous"`
 }
 
 type ModelConfig struct {

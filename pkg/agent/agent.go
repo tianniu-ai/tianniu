@@ -29,17 +29,23 @@ type Agent struct {
 	client       openai.Client
 	nativeTools  map[tool.AgentTool]tool.Tool
 	systemPrompt string
+	mcpClients   map[string]*McpClient
 }
 
-func NewAgent(modelConf shared.ModelConfig, systemPrompt string, tools []tool.Tool) *Agent {
+func NewAgent(modelConf shared.ModelConfig, systemPrompt string, tools []tool.Tool,
+	mcpClients []*McpClient) *Agent {
 	a := &Agent{
 		model:        modelConf.Model,
 		client:       shared.NewLLMClient(modelConf),
 		nativeTools:  make(map[tool.AgentTool]tool.Tool),
 		systemPrompt: systemPrompt,
+		mcpClients:   make(map[string]*McpClient),
 	}
 	for _, t := range tools {
 		a.nativeTools[t.ToolName()] = t
+	}
+	for _, mcpClient := range mcpClients {
+		a.mcpClients[mcpClient.Name()] = mcpClient
 	}
 	return a
 }
@@ -50,13 +56,29 @@ func (a *Agent) Model() string {
 
 func (a *Agent) findTool(toolName string) (tool.Tool, bool) {
 	t, ok := a.nativeTools[toolName]
-	return t, ok
+	if ok {
+		return t, true
+	}
+	for _, mcpClient := range a.mcpClients {
+		for _, t := range mcpClient.GetTools() {
+			if t.ToolName() != toolName {
+				continue
+			}
+			return t, true
+		}
+	}
+	return t, false
 }
 
 func (a *Agent) buildTools() []openai.ChatCompletionToolUnionParam {
 	tools := make([]openai.ChatCompletionToolUnionParam, 0, len(a.nativeTools))
 	for _, t := range a.nativeTools {
 		tools = append(tools, t.Info())
+	}
+	for _, mcpClient := range a.mcpClients {
+		for _, t := range mcpClient.GetTools() {
+			tools = append(tools, t.Info())
+		}
 	}
 	return tools
 }
