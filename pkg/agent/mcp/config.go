@@ -1,4 +1,4 @@
-package shared
+package mcp
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type McpServerConfig struct {
+type ServerConfig struct {
 	// for stdio
 	Command string            `json:"command" yaml:"command"`
 	Args    []string          `json:"args" yaml:"args"`
@@ -17,16 +17,16 @@ type McpServerConfig struct {
 	Headers map[string]string `json:"headers" yaml:"headers"`
 }
 
-func (s *McpServerConfig) IsStdio() bool {
+func (s *ServerConfig) IsStdio() bool {
 	return s.Command != ""
 }
 
-func (s *McpServerConfig) IsHttp() bool {
+func (s *ServerConfig) IsHttp() bool {
 	return s.Url != ""
 }
 
-func (s *McpServerConfig) ReplacePlaceholders(replaceMap map[string]string) McpServerConfig {
-	newConfig := McpServerConfig{
+func (s *ServerConfig) ReplacePlaceholders(replaceMap map[string]string) ServerConfig {
+	newConfig := ServerConfig{
 		Command: s.Command,
 		Args:    make([]string, 0),
 		Env:     s.Env,
@@ -46,12 +46,12 @@ func (s *McpServerConfig) ReplacePlaceholders(replaceMap map[string]string) McpS
 	return newConfig
 }
 
-func LoadMcpServerConfig(path string) (map[string]McpServerConfig, error) {
+func LoadMcpServerConfig(path string) (map[string]ServerConfig, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	serverMap := make(map[string]McpServerConfig)
+	serverMap := make(map[string]ServerConfig)
 
 	err = json.Unmarshal(content, &serverMap)
 	if err != nil {

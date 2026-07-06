@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	defaultTimeout       = 30 * time.Second
-	defaultMaxOutput     = 64 * 1024
-	defaultMaxCommandLen = 4096
+	defaultTimeoutSeconds = 30
+	defaultMaxOutputBk    = 64
+	defaultMaxCommandLen  = 4096
 )
 
 var dangerousPatterns = []*regexp.Regexp{
@@ -60,11 +60,11 @@ var blockedEnvPrefixes = []string{
 }
 
 type BashToolConfig struct {
-	Timeout        time.Duration `json:"timeout"`
-	MaxOutput      int           `json:"max_output"`
-	WorkDir        string        `json:"work_dir"`
-	Disabled       bool          `json:"disabled"`
-	AllowDangerous bool          `json:"allow_dangerous"`
+	TimeoutSeconds int    `json:"timeout_seconds"`
+	MaxOutputKB    int    `json:"max_output_kb"`
+	WorkDir        string `json:"work_dir"`
+	Disabled       bool   `json:"disabled"`
+	AllowDangerous bool   `json:"allow_dangerous"`
 }
 
 type BashTool struct {
@@ -72,11 +72,11 @@ type BashTool struct {
 }
 
 func NewBashTool(config BashToolConfig) *BashTool {
-	if config.Timeout <= 0 {
-		config.Timeout = defaultTimeout
+	if config.TimeoutSeconds <= 0 {
+		config.TimeoutSeconds = defaultTimeoutSeconds
 	}
-	if config.MaxOutput <= 0 {
-		config.MaxOutput = defaultMaxOutput
+	if config.MaxOutputKB <= 0 {
+		config.MaxOutputKB = defaultMaxOutputBk
 	}
 	return &BashTool{config: config}
 }
@@ -126,7 +126,7 @@ func (t *BashTool) Execute(ctx context.Context, argumentsInJSON string) (string,
 		}
 	}
 
-	timeout := t.config.Timeout
+	timeout := time.Duration(t.config.TimeoutSeconds) * time.Second
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -167,8 +167,8 @@ func (t *BashTool) Execute(ctx context.Context, argumentsInJSON string) (string,
 		combined += errOut
 	}
 
-	if len(combined) > t.config.MaxOutput {
-		combined = combined[:t.config.MaxOutput] + fmt.Sprintf("\n... [output truncated, max %d bytes]", t.config.MaxOutput)
+	if len(combined) > t.config.MaxOutputKB*1024 {
+		combined = combined[:t.config.MaxOutputKB*1024] + fmt.Sprintf("\n... [output truncated, max %d bytes]", t.config.MaxOutputKB*1024)
 	}
 
 	if err != nil {

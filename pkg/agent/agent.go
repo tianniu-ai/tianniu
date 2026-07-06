@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/liyue201/tian-niu/pkg/agent/mcp"
 	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 
 	"github.com/liyue201/tian-niu/pkg/agent/tool"
 	"github.com/liyue201/tian-niu/pkg/shared"
@@ -24,22 +26,39 @@ You are 天牛, a professional knowledge Q&A assistant.
 - Wrap all code snippets with Markdown syntax highlighting blocks.
 `
 
+type ModelConfig struct {
+	BaseURL string `json:"base_url"`
+	ApiKey  string `json:"api_key"`
+	Model   string `json:"model"`
+
+	ContextWindow int `json:"context_window"`
+}
+
 type Agent struct {
 	model        string
 	client       openai.Client
 	nativeTools  map[tool.AgentTool]tool.Tool
 	systemPrompt string
-	mcpClients   map[string]*McpClient
+	mcpClients   map[string]*mcp.Client
 }
 
-func NewAgent(modelConf shared.ModelConfig, systemPrompt string, tools []tool.Tool,
-	mcpClients []*McpClient) *Agent {
+func NewLLMClient(modelConf ModelConfig) openai.Client {
+	client := openai.NewClient(
+		option.WithBaseURL(modelConf.BaseURL),
+		option.WithAPIKey(modelConf.ApiKey),
+		option.WithHeader("X-Title", "Tianniu"),
+	)
+	return client
+}
+
+func NewAgent(modelConf ModelConfig, systemPrompt string, tools []tool.Tool,
+	mcpClients []*mcp.Client) *Agent {
 	a := &Agent{
 		model:        modelConf.Model,
-		client:       shared.NewLLMClient(modelConf),
+		client:       NewLLMClient(modelConf),
 		nativeTools:  make(map[tool.AgentTool]tool.Tool),
 		systemPrompt: systemPrompt,
-		mcpClients:   make(map[string]*McpClient),
+		mcpClients:   make(map[string]*mcp.Client),
 	}
 	for _, t := range tools {
 		a.nativeTools[t.ToolName()] = t
