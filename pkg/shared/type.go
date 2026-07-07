@@ -4,7 +4,7 @@ import "github.com/openai/openai-go/v3"
 
 type OpenAIMessage = openai.ChatCompletionMessageParamUnion
 
-// GetRoleName returns the role name from a message (without relying on GetRole())
+// GetRoleName extracts role name from message (does not depend on GetRole())
 func GetRoleName(message OpenAIMessage) string {
 	if message.OfSystem != nil {
 		return "system"

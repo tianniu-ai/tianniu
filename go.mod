@@ -1,6 +1,6 @@
 module github.com/liyue201/tian-niu
 
-go 1.25.1
+go 1.26.4
 
 require (
 	github.com/gin-contrib/cors v1.7.7
@@ -11,6 +11,7 @@ require (
 	github.com/libtnb/sqlite v1.1.2
 	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/openai/openai-go/v3 v3.41.0
+	github.com/tiktoken-go/tokenizer v0.8.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.48.0
 	gorm.io/gorm v1.31.2
@@ -21,6 +22,7 @@ require (
 	github.com/bytedance/sonic v1.15.0 // indirect
 	github.com/bytedance/sonic/loader v0.5.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
+	github.com/dlclark/regexp2/v2 v2.1.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect

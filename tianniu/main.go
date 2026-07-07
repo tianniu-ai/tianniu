@@ -2,24 +2,48 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/liyue201/tian-niu/pkg/agent"
+	"github.com/liyue201/tian-niu/pkg/agent/mcp"
 	"github.com/liyue201/tian-niu/pkg/agent/tool"
+	ctxengine "github.com/liyue201/tian-niu/pkg/context"
 	"github.com/liyue201/tian-niu/pkg/repository"
 	"github.com/liyue201/tian-niu/pkg/server"
 	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/liyue201/tian-niu/pkg/shared/log"
+	"github.com/liyue201/tian-niu/pkg/storage/repository_storage"
 )
+
+type AppConfig struct {
+	LLMProviders struct {
+		FrontModel shared.ModelConfig `json:"front_model"`
+		BackModel  shared.ModelConfig `json:"back_model"`
+	} `json:"llm_providers"`
+	BashTool tool.BashToolConfig `json:"bash_tool"`
+}
+
+func loadAppConfig(path string) (AppConfig, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return AppConfig{}, err
+	}
+	var config AppConfig
+	err = json.Unmarshal(content, &config)
+	if err != nil {
+		return AppConfig{}, err
+	}
+	return config, nil
+}
 
 func main() {
 	_ = godotenv.Load()
 
-	appConf, err := shared.LoadAppConfig("config.json")
+	appConf, err := loadAppConfig("config.json")
 	if err != nil {
 		log.Errorf("Failed to load config.json: %v", err)
 		panic(err)
@@ -35,23 +59,14 @@ func main() {
 		panic(err)
 	}
 
-	bashConf := appConf.BashTool
-	bashToolConfig := tool.BashToolConfig{
-		Timeout:        time.Duration(bashConf.TimeoutSeconds) * time.Second,
-		MaxOutput:      bashConf.MaxOutputKB * 1024,
-		WorkDir:        bashConf.WorkDir,
-		Disabled:       bashConf.Disabled,
-		AllowDangerous: bashConf.AllowDangerous,
-	}
-
-	mcpServerMap, err := shared.LoadMcpServerConfig("mcp-server.json")
+	mcpServerMap, err := mcp.LoadMcpServerConfig("mcp-server.json")
 	if err != nil {
 		log.Errorf("Failed to load MCP server configuration: %v", err)
 	}
 	ctx := context.Background()
-	mcpClients := make([]*agent.McpClient, 0)
+	mcpClients := make([]*mcp.Client, 0)
 	for k, v := range mcpServerMap {
-		mcpClient := agent.NewMcpToolProvider(k, v)
+		mcpClient := mcp.NewMcpToolProvider(k, v)
 		if err := mcpClient.RefreshTools(ctx); err != nil {
 			log.Errorf("Failed to refresh tools for MCP server %s: %v", k, err)
 			continue
@@ -59,9 +74,25 @@ func main() {
 		mcpClients = append(mcpClients, mcpClient)
 	}
 
-	a := agent.NewAgent(appConf.LLMProviders.FrontModel, agent.SystemPrompt,
-		[]tool.Tool{tool.NewBashTool(bashToolConfig)}, mcpClients)
-	s := server.NewServer(":8080", db, a)
+	// Create context engine and policies
+	store := repository_storage.NewRepositoryStorage(db)
+	summarizer := ctxengine.NewLLMSummarizer(appConf.LLMProviders.BackModel, 200)
+
+	policies := []ctxengine.Policy{
+		ctxengine.NewOffloadPolicy(store, 0.4, 0, 100),
+		ctxengine.NewSummaryPolicy(summarizer, 10, 20, 0.6),
+		ctxengine.NewTruncatePolicy(0, 0.85),
+	}
+
+	mgr := agent.NewManager(
+		db,
+		appConf.LLMProviders.FrontModel,
+		agent.SystemPrompt,
+		[]tool.Tool{tool.NewBashTool(appConf.BashTool)},
+		mcpClients,
+		policies)
+
+	s := server.NewServer(":8080", db, mgr)
 	s.Run()
 	defer s.Stop()
 

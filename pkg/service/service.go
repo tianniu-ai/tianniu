@@ -19,12 +19,12 @@ import (
 )
 
 type Service struct {
-	db    *repository.Repository
-	agent *agent.Agent
+	db  *repository.Repository
+	mgr *agent.Manager
 }
 
-func NewService(db *repository.Repository, agent *agent.Agent) *Service {
-	return &Service{db: db, agent: agent}
+func NewService(db *repository.Repository, mgr *agent.Manager) *Service {
+	return &Service{db: db, mgr: mgr}
 }
 
 func (s *Service) Register(req vo.RegisterReq) (vo.UserVO, error) {
@@ -202,14 +202,6 @@ func (s *Service) CreateMessage(ctx context.Context, conversationID string, req 
 		return errors.New("user_id must match the one in the token")
 	}
 
-	// Build history from previous messages
-	historyMsgs, err := s.db.GetConversationMessages(conversationID, 10)
-	if err != nil {
-		return err
-	}
-
-	history := buildHistory(historyMsgs, req.ParentMessageID)
-
 	msgID := uuid.New().String()
 	createdAt := time.Now().Unix()
 
@@ -228,7 +220,10 @@ func (s *Service) CreateMessage(ctx context.Context, conversationID string, req 
 		}
 	}()
 
-	result, runErr := s.agent.RunStreaming(ctx, history, req.Query, eventCh)
+	agent := s.mgr.GetAgent(conversationID)
+
+	// TODO: ParentMessageID is not used yet.
+	result, runErr := agent.RunStreaming(ctx, req.Query, eventCh)
 	if runErr != nil {
 		log.Warnf("run streaming error: %v", runErr)
 		return runErr
@@ -245,7 +240,7 @@ func (s *Service) CreateMessage(ctx context.Context, conversationID string, req 
 		Response:        result.Response,
 		Rounds:          string(roundsJSON),
 		Usage:           string(usageJSON),
-		Model:           s.agent.Model(),
+		Model:           agent.Model(),
 		CreatedAt:       createdAt,
 	})
 

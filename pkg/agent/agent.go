@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/liyue201/tian-niu/pkg/agent/mcp"
+	ctxengine "github.com/liyue201/tian-niu/pkg/context"
 	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 
 	"github.com/liyue201/tian-niu/pkg/agent/tool"
 	"github.com/liyue201/tian-niu/pkg/shared"
@@ -25,21 +28,35 @@ You are 天牛, a professional knowledge Q&A assistant.
 `
 
 type Agent struct {
-	model        string
-	client       openai.Client
-	nativeTools  map[tool.AgentTool]tool.Tool
-	systemPrompt string
-	mcpClients   map[string]*McpClient
+	model         string
+	client        openai.Client
+	nativeTools   map[tool.AgentTool]tool.Tool
+	systemPrompt  string
+	mcpClients    map[string]*mcp.Client
+	contextEngine *ctxengine.Engine
 }
 
-func NewAgent(modelConf shared.ModelConfig, systemPrompt string, tools []tool.Tool,
-	mcpClients []*McpClient) *Agent {
+func NewLLMClient(modelConf shared.ModelConfig) openai.Client {
+	client := openai.NewClient(
+		option.WithBaseURL(modelConf.BaseURL),
+		option.WithAPIKey(modelConf.ApiKey),
+		option.WithHeader("X-Title", "Tianniu"),
+	)
+	return client
+}
+
+func NewAgent(modelConf shared.ModelConfig,
+	systemPrompt string,
+	tools []tool.Tool,
+	mcpClients []*mcp.Client,
+	contextEngine *ctxengine.Engine) *Agent {
 	a := &Agent{
-		model:        modelConf.Model,
-		client:       shared.NewLLMClient(modelConf),
-		nativeTools:  make(map[tool.AgentTool]tool.Tool),
-		systemPrompt: systemPrompt,
-		mcpClients:   make(map[string]*McpClient),
+		model:         modelConf.Model,
+		client:        NewLLMClient(modelConf),
+		nativeTools:   make(map[tool.AgentTool]tool.Tool),
+		systemPrompt:  systemPrompt,
+		mcpClients:    make(map[string]*mcp.Client),
+		contextEngine: contextEngine,
 	}
 	for _, t := range tools {
 		a.nativeTools[t.ToolName()] = t
@@ -47,6 +64,7 @@ func NewAgent(modelConf shared.ModelConfig, systemPrompt string, tools []tool.To
 	for _, mcpClient := range mcpClients {
 		a.mcpClients[mcpClient.Name()] = mcpClient
 	}
+	a.contextEngine.Init(systemPrompt, ctxengine.TokenBudget{ContextWindow: modelConf.ContextWindow})
 	return a
 }
 
@@ -102,17 +120,17 @@ type RunResult struct {
 
 // RunStreaming executes the agent loop, streaming output via eventCh, and returns RunResult when done.
 // history is the deserialized message list from all previous ChatMessage.Rounds in this conversation.
-func (a *Agent) RunStreaming(ctx context.Context, history []openai.ChatCompletionMessageParamUnion, query string, eventCh chan<- StreamEvent) (RunResult, error) {
-	// Build messages for this round: system + history + current user message
-	messages := make([]openai.ChatCompletionMessageParamUnion, 0, len(history)+2)
-	messages = append(messages, openai.SystemMessage(a.systemPrompt))
-	messages = append(messages, history...)
-	messages = append(messages, openai.UserMessage(query))
+func (a *Agent) RunStreaming(ctx context.Context, query string, eventCh chan<- StreamEvent) (RunResult, error) {
 
-	// roundMessages tracks new messages from this round (user + assistant + tool, excluding system and history)
+	draft := a.contextEngine.StartTurn(openai.UserMessage(query))
+	defer a.contextEngine.AbortTurn(draft)
+
+	messages := a.contextEngine.BuildRequestMessages()
+	messages = append(messages, draft.NewMessages...)
+	var usage openai.CompletionUsage
+
 	roundMessages := []shared.OpenAIMessage{openai.UserMessage(query)}
 
-	var usage openai.CompletionUsage
 	var finalResponse string
 
 	for {
@@ -179,12 +197,17 @@ func (a *Agent) RunStreaming(ctx context.Context, history []openai.ChatCompletio
 			roundMessages = append(roundMessages, toolMsg)
 		}
 
-		// Check if context is cancelled
+		// Check if context is canceled
 		select {
 		case <-ctx.Done():
 			return RunResult{Response: finalResponse}, ctx.Err()
 		default:
 		}
+	}
+
+	err := a.contextEngine.CommitTurn(ctx, draft, ctxengine.Usage{PromptTokens: int(usage.TotalTokens)})
+	if err != nil {
+		return RunResult{}, err
 	}
 
 	return RunResult{

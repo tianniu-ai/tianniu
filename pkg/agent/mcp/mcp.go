@@ -1,4 +1,4 @@
-package agent
+package mcp
 
 import (
 	"context"
@@ -15,10 +15,10 @@ import (
 	shared2 "github.com/openai/openai-go/v3/shared"
 )
 
-type McpClient struct {
+type Client struct {
 	name         string
 	client       *mcp.Client
-	serverConfig shared.McpServerConfig
+	serverConfig ServerConfig
 
 	session *mcp.ClientSession
 	tools   []tool.Tool
@@ -31,13 +31,13 @@ func initRunningVars() map[string]string {
 	return runningVars
 }
 
-func NewMcpToolProvider(name string, server shared.McpServerConfig) *McpClient {
+func NewMcpToolProvider(name string, server ServerConfig) *Client {
 
-	return &McpClient{
+	return &Client{
 		name: name,
 		client: mcp.NewClient(&mcp.Implementation{
-			Name:    "babyagent-mcp-client",
-			Title:   "BabyAgent",
+			Name:    "tianniu-mcp-client",
+			Title:   "TianNiu",
 			Version: "v1.0.0",
 		}, nil),
 		serverConfig: server.ReplacePlaceholders(initRunningVars()),
@@ -45,12 +45,11 @@ func NewMcpToolProvider(name string, server shared.McpServerConfig) *McpClient {
 	}
 }
 
-func (e *McpClient) Name() string {
+func (e *Client) Name() string {
 	return e.name
 }
 
-func (e *McpClient) connect(ctx context.Context) error {
-	// 服务联通，不需要再初始化
+func (e *Client) connect(ctx context.Context) error {
 	if e.session != nil && e.session.Ping(ctx, &mcp.PingParams{}) == nil {
 		return nil
 	}
@@ -71,7 +70,7 @@ func (e *McpClient) connect(ctx context.Context) error {
 	return nil
 }
 
-func (e *McpClient) RefreshTools(ctx context.Context) error {
+func (e *Client) RefreshTools(ctx context.Context) error {
 	if err := e.connect(ctx); err != nil {
 		return err
 	}
@@ -83,7 +82,7 @@ func (e *McpClient) RefreshTools(ctx context.Context) error {
 
 	e.tools = make([]tool.Tool, 0)
 	for _, mcpTool := range mcpToolResult.Tools {
-		agentTool := &McpTool{
+		agentTool := &Tool{
 			client:   e,
 			toolName: mcpTool.Name,
 			session:  e.session,
@@ -95,11 +94,11 @@ func (e *McpClient) RefreshTools(ctx context.Context) error {
 	return nil
 }
 
-func (e *McpClient) GetTools() []tool.Tool {
+func (e *Client) GetTools() []tool.Tool {
 	return e.tools
 }
 
-func (e *McpClient) callTool(ctx context.Context, toolName string, argumentsInJSON string) (string, error) {
+func (e *Client) callTool(ctx context.Context, toolName string, argumentsInJSON string) (string, error) {
 	if err := e.connect(ctx); err != nil {
 		return "", err
 	}
@@ -121,20 +120,20 @@ func (e *McpClient) callTool(ctx context.Context, toolName string, argumentsInJS
 	return builder.String(), nil
 }
 
-// McpTool 实现 tool.Tool 接口
-type McpTool struct {
-	toolName string // 给 mcp server 看的，和给模型看的不一样
-	client   *McpClient
+// Tool implements the tool.Tool interface
+type Tool struct {
+	toolName string // name sent to the MCP server; differs from the name exposed to the model
+	client   *Client
 	session  *mcp.ClientSession
 	mcpTool  *mcp.Tool
 }
 
-// ToolName 给模型看的，和给 mcp server 看的不一样
-func (t *McpTool) ToolName() string {
-	return fmt.Sprintf("babyagent_mcp__%s__%s", t.client.Name(), t.toolName)
+// ToolName returns the name exposed to the model; differs from the name sent to the MCP server
+func (t *Tool) ToolName() string {
+	return fmt.Sprintf("tianniu_mcp__%s__%s", t.client.Name(), t.toolName)
 }
 
-func (t *McpTool) Info() openai.ChatCompletionToolUnionParam {
+func (t *Tool) Info() openai.ChatCompletionToolUnionParam {
 	return openai.ChatCompletionFunctionTool(shared2.FunctionDefinitionParam{
 		Description: openai.String(t.mcpTool.Description),
 		Name:        t.ToolName(),
@@ -142,6 +141,6 @@ func (t *McpTool) Info() openai.ChatCompletionToolUnionParam {
 	})
 }
 
-func (t *McpTool) Execute(ctx context.Context, argumentsInJSON string) (string, error) {
+func (t *Tool) Execute(ctx context.Context, argumentsInJSON string) (string, error) {
 	return t.client.callTool(ctx, t.toolName, argumentsInJSON)
 }

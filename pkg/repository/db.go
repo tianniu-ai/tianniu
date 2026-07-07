@@ -20,7 +20,7 @@ func NewRepository(dsn string) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = db.AutoMigrate(&model.User{}, &model.Conversation{}, &model.ChatMessage{})
+	err = db.AutoMigrate(&model.User{}, &model.Conversation{}, &model.ChatMessage{}, &model.KVData{})
 	if err != nil {
 		return nil, err
 	}

@@ -23,8 +23,8 @@ type Server struct {
 	wg         sync.WaitGroup
 }
 
-func NewServer(addr string, db *repository.Repository, agent *agent.Agent) *Server {
-	svc := service.NewService(db, agent)
+func NewServer(addr string, db *repository.Repository, mgr *agent.Manager) *Server {
+	svc := service.NewService(db, mgr)
 	engine := gin.New()
 	gin.SetMode(gin.ReleaseMode)
 	engine.Use(gin.Recovery(), gin.Logger())
