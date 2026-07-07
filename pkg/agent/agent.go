@@ -197,12 +197,17 @@ func (a *Agent) RunStreaming(ctx context.Context, query string, eventCh chan<- S
 			roundMessages = append(roundMessages, toolMsg)
 		}
 
-		// Check if context is cancelled
+		// Check if context is canceled
 		select {
 		case <-ctx.Done():
 			return RunResult{Response: finalResponse}, ctx.Err()
 		default:
 		}
+	}
+
+	err := a.contextEngine.CommitTurn(ctx, draft, ctxengine.Usage{PromptTokens: int(usage.TotalTokens)})
+	if err != nil {
+		return RunResult{}, err
 	}
 
 	return RunResult{

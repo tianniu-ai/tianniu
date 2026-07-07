@@ -222,6 +222,7 @@ func (s *Service) CreateMessage(ctx context.Context, conversationID string, req 
 
 	agent := s.mgr.GetAgent(conversationID)
 
+	// TODO: ParentMessageID is not used yet.
 	result, runErr := agent.RunStreaming(ctx, req.Query, eventCh)
 	if runErr != nil {
 		log.Warnf("run streaming error: %v", runErr)
