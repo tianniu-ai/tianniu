@@ -11,6 +11,7 @@ A lightweight AI chat agent built with Go and React, featuring streaming message
 - **MCP Integration**: Connect to any MCP-compatible tool server (stdio / HTTP) to extend agent capabilities
 - **Reasoning Panel**: Display the AI's thinking process (DeepSeek-R1, QwQ, etc.)
 - **Bash Tool**: Execute shell commands with built-in security restrictions (dangerous pattern blocking, timeout, output limits, env filtering)
+- **Memory System**: Multi-level memory management (global + workspace) for context retention
 - **Markdown Rendering**: Full markdown support (GFM) for AI responses and tool results
 - **JWT Authentication**: User registration, login, and token-based access control
 - **Context Management**: Automatic message summarization and content offloading to manage context window
