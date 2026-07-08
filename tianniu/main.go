@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/jinzhu/configor"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"github.com/tianniu-ai/tianniu/pkg/agent"
@@ -22,20 +22,17 @@ import (
 )
 
 type AppConfig struct {
-	LLMProviders struct {
-		FrontModel shared.ModelConfig `json:"front_model"`
-		BackModel  shared.ModelConfig `json:"back_model"`
-	} `json:"llm_providers"`
-	BashTool tool.BashToolConfig `json:"bash_tool"`
+	ServerAddress string `yaml:"server_address"`
+	LLMProviders  struct {
+		FrontModel shared.ModelConfig `yaml:"front_model"`
+		BackModel  shared.ModelConfig `yaml:"back_model"`
+	} `yaml:"llm_providers"`
+	BashTool tool.BashToolConfig `yaml:"bash_tool"`
 }
 
 func loadAppConfig(path string) (AppConfig, error) {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return AppConfig{}, err
-	}
 	var config AppConfig
-	err = json.Unmarshal(content, &config)
+	err := configor.Load(&config, path)
 	if err != nil {
 		return AppConfig{}, err
 	}
@@ -45,9 +42,9 @@ func loadAppConfig(path string) (AppConfig, error) {
 func main() {
 	_ = godotenv.Load()
 
-	appConf, err := loadAppConfig("config.json")
+	appConf, err := loadAppConfig("config.yaml")
 	if err != nil {
-		log.Errorf("Failed to load config.json: %v", err)
+		log.Errorf("Failed to load config.yaml: %v", err)
 		panic(err)
 	}
 
@@ -107,7 +104,7 @@ func main() {
 		policies,
 		multiLevelMemory)
 
-	s := server.NewServer(":8080", db, mgr)
+	s := server.NewServer(appConf.ServerAddress, db, mgr)
 	s.Run()
 	defer s.Stop()
 

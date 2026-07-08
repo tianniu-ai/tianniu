@@ -1,6 +1,6 @@
 # 天牛
 
-A lightweight AI chat agent built with Go and React, featuring streaming message processing, tool calls, MCP integration, and multi-threaded conversations.
+A lightweight AI chat agent built with Go, featuring streaming message processing, tool calls, MCP integration, and multi-threaded conversations.
 
 ## Features
 
@@ -33,84 +33,24 @@ A lightweight AI chat agent built with Go and React, featuring streaming message
 1. **Configure the backend**
 
 ```bash
-cp config.example.json config.json
+cp config.example.yaml config.yaml
 ```
 
-Edit `config.json` with your LLM provider and tool settings:
+Edit `config.yaml` with your LLM provider and tool settings:
 
-```json
-{
-  "llm_providers": {
-    "front_model": {
-      "base_url": "https://api.openai.com/v1",
-      "model": "gpt-4o",
-      "api_key": "your-api-key",
-      "context_window": 200000
-    },
-    "back_model": {
-      "base_url": "https://api.openai.com/v1",
-      "model": "gpt-4o",
-      "api_key": "your-api-key",
-      "context_window": 200000
-    }
-  },
-  "bash_tool": {
-    "timeout_seconds": 30,
-    "max_output_kb": 64,
-    "work_dir": "",
-    "disabled": false,
-    "allow_dangerous": false
-  }
-}
-```
 
 2. **(Optional) Configure MCP servers**
 
-```bash
-cp mcp-server.example.json mcp-server.json
-```
-
 Edit `mcp-server.json` to connect external tool servers:
-
-```json
-{
-  "filesystem": {
-    "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/dir"]
-  },
-  "remote-api": {
-    "type": "http",
-    "url": "http://localhost:3001/mcp"
-  }
-}
-```
 
 3. **Start the backend**
 
 ```bash
 go run ./tianniu/main.go
 ```
-
 The server runs on `http://localhost:8080`.
 
-### Docker Deployment
-
-Run with Docker Compose:
-
-```bash
-docker-compose up -d
-```
-
-The backend runs on `http://localhost:8080` and frontend on `http://localhost:80`.
-
-Environment variables can be configured via `.env` file:
-
-```env
-JWT_SECRET=your-secure-secret-key
-```
-
 ## Frontend Integration
-
 Refer to the workspace repository: https://github.com/tianniu-ai/tianniu-workspace
 
 ### Environment Variables
@@ -123,27 +63,6 @@ Refer to the workspace repository: https://github.com/tianniu-ai/tianniu-workspa
 | `GIN_MODE` | Gin run mode (`debug`/`release`) | `debug` |
 
 ## Configuration
-
-### Built-in Tools
-
-#### Bash Tool
-
-Execute shell commands with multiple security layers:
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `timeout_seconds` | Command execution timeout | `30` |
-| `max_output_kb` | Maximum output size (truncated if exceeded) | `64` |
-| `work_dir` | Restrict working directory (empty = no restriction) | `""` |
-| `disabled` | Disable the Bash tool entirely | `false` |
-| `allow_dangerous` | Bypass dangerous pattern blocking (use with caution) | `false` |
-
-Security features:
-- **Dangerous command blocking**: Patterns like `sudo`, `rm -rf /`, `mkfs`, `shutdown`, `curl | sh`, fork bombs, etc.
-- **Sensitive environment filtering**: Environment variables with prefixes `JWT_`, `API_KEY`, `SECRET`, `TOKEN`, `PASSWORD`, `AWS_`, etc. are stripped from the command's environment
-- **Output truncation**: Prevents memory exhaustion from large command output
-- **Command length limit**: Maximum 4096 characters
-
 
 ### Context Management Policies
 

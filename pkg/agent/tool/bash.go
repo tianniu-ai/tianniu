@@ -60,11 +60,11 @@ var blockedEnvPrefixes = []string{
 }
 
 type BashToolConfig struct {
-	TimeoutSeconds int    `json:"timeout_seconds"`
-	MaxOutputKB    int    `json:"max_output_kb"`
-	WorkDir        string `json:"work_dir"`
-	Disabled       bool   `json:"disabled"`
-	AllowDangerous bool   `json:"allow_dangerous"`
+	TimeoutSeconds int    `yaml:"timeout_seconds"`
+	MaxOutputKB    int    `yaml:"max_output_kb"`
+	WorkDir        string `yaml:"work_dir"`
+	Disabled       bool   `yaml:"disabled"`
+	AllowDangerous bool   `yaml:"allow_dangerous"`
 }
 
 type BashTool struct {
