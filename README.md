@@ -18,19 +18,12 @@ A lightweight AI chat agent built with Go and React, featuring streaming message
 
 ## Tech Stack
 
-### Frontend
-- React 19 + TypeScript
-- Vite 8
-- Tailwind CSS 4.0
-- @assistant-ui/react, @radix-ui/react
-- react-markdown + remark-gfm
-- lucide-react
-
 ### Backend
-- Go 1.25 + Gin
+- Go 1.26.4 + Gin
 - OpenAI Go SDK v3
 - MCP Go SDK v1
 - GORM + SQLite
+- Redis for memory storage
 - JWT authentication (golang-jwt/v5)
 
 ## Quick Start
@@ -100,35 +93,25 @@ go run ./tianniu/main.go
 
 The server runs on `http://localhost:8080`.
 
-4. **Start the frontend**
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Visit `http://localhost:5173`. API requests to `/api` are proxied to the backend automatically via Vite.
-
 ### Docker Deployment
 
-1. **Prepare config**
+Run with Docker Compose:
 
 ```bash
-cp config.example.json config.json
-# Edit config.json with your API keys
+docker-compose up -d
 ```
 
-2. **Build and run**
+The backend runs on `http://localhost:8080` and frontend on `http://localhost:80`.
 
-```bash
-docker compose up -d --build
+Environment variables can be configured via `.env` file:
+
+```env
+JWT_SECRET=your-secure-secret-key
 ```
 
-3. **Access the app**
+## Frontend Integration
 
-- Frontend: http://localhost:80
-- Backend API: http://localhost:8080
+Refer to the workspace repository: https://github.com/tianniu-ai/tianniu-workspace
 
 ### Environment Variables
 
@@ -224,9 +207,9 @@ MCP tools are automatically discovered and registered as agent tools at startup.
 
 ## Supported Models
 
-- OpenAI: gpt-4o, gpt-4o-mini, gpt-4-turbo
+- OpenAI: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-5.2
 - DeepSeek: deepseek-chat, deepseek-reasoner (with reasoning output)
-- Zhipu AI: GLM-5.2, GLM-4
+- Zhipu AI: GLM-5.2, GLM-4, GLM-4.6V
 - Qwen: QwQ, Qwen3
 - Any model compatible with the OpenAI API format
 
