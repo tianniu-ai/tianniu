@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/libtnb/sqlite"
-	"github.com/liyue201/tian-niu/pkg/model"
+	"github.com/tianniu-ai/tianniu/pkg/model"
 	"gorm.io/gorm"
 )
 

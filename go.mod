@@ -1,4 +1,4 @@
-module github.com/liyue201/tian-niu
+module github.com/tianniu-ai/tianniu
 
 go 1.26.4
 

@@ -3,7 +3,7 @@ package repository_storage
 import (
 	"context"
 
-	"github.com/liyue201/tian-niu/pkg/repository"
+	"github.com/tianniu-ai/tianniu/pkg/repository"
 )
 
 type RepositoryStorage struct {

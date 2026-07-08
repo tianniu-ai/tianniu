@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/liyue201/tian-niu/pkg/shared"
-	"github.com/liyue201/tian-niu/pkg/storage"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
+	"github.com/tianniu-ai/tianniu/pkg/storage"
 )
 
 type Memory interface {

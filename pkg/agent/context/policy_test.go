@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/openai/openai-go/v3"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 type fakeSummarizer struct {

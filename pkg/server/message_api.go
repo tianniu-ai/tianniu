@@ -4,9 +4,9 @@ import (
 	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
-	"github.com/liyue201/tian-niu/pkg/agent"
-	"github.com/liyue201/tian-niu/pkg/vo"
 	log "github.com/sirupsen/logrus"
+	"github.com/tianniu-ai/tianniu/pkg/agent"
+	"github.com/tianniu-ai/tianniu/pkg/vo"
 )
 
 // GET /conversation/:conversation_id/message

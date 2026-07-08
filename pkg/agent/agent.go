@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	ctxengine "github.com/liyue201/tian-niu/pkg/agent/context"
-	"github.com/liyue201/tian-niu/pkg/agent/llm"
-	"github.com/liyue201/tian-niu/pkg/agent/mcp"
-	"github.com/liyue201/tian-niu/pkg/agent/tool"
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/openai/openai-go/v3"
+	ctxengine "github.com/tianniu-ai/tianniu/pkg/agent/context"
+	"github.com/tianniu-ai/tianniu/pkg/agent/llm"
+	"github.com/tianniu-ai/tianniu/pkg/agent/mcp"
+	"github.com/tianniu-ai/tianniu/pkg/agent/tool"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 type Agent struct {

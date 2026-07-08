@@ -1,9 +1,9 @@
 package llm
 
 import (
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 func NewLLMClient(modelConf shared.ModelConfig) openai.Client {

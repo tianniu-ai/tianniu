@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/liyue201/tian-niu/pkg/agent/llm"
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/openai/openai-go/v3"
+	"github.com/tianniu-ai/tianniu/pkg/agent/llm"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 type Summarizer interface {

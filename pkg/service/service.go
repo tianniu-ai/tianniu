@@ -6,15 +6,15 @@ import (
 	"errors"
 	"time"
 
-	"github.com/liyue201/tian-niu/pkg/auth"
-	"github.com/liyue201/tian-niu/pkg/model"
-	"github.com/liyue201/tian-niu/pkg/repository"
+	"github.com/tianniu-ai/tianniu/pkg/auth"
+	"github.com/tianniu-ai/tianniu/pkg/model"
+	"github.com/tianniu-ai/tianniu/pkg/repository"
 
 	"github.com/google/uuid"
-	"github.com/liyue201/tian-niu/pkg/agent"
-	"github.com/liyue201/tian-niu/pkg/shared"
-	"github.com/liyue201/tian-niu/pkg/vo"
 	log "github.com/sirupsen/logrus"
+	"github.com/tianniu-ai/tianniu/pkg/agent"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
+	"github.com/tianniu-ai/tianniu/pkg/vo"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -3,9 +3,9 @@ package context
 import (
 	"encoding/json"
 
-	"github.com/liyue201/tian-niu/pkg/model"
+	"github.com/tianniu-ai/tianniu/pkg/model"
 
-	"github.com/liyue201/tian-niu/pkg/shared"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 // buildHistory traces the path from parent_message_id up to the root,

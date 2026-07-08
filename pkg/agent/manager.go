@@ -3,14 +3,14 @@ package agent
 import (
 	"sync"
 
-	"github.com/liyue201/tian-niu/pkg/agent/context"
-	"github.com/liyue201/tian-niu/pkg/agent/llm"
-	"github.com/liyue201/tian-niu/pkg/agent/mcp"
-	"github.com/liyue201/tian-niu/pkg/agent/memory"
-	"github.com/liyue201/tian-niu/pkg/agent/tool"
-	"github.com/liyue201/tian-niu/pkg/repository"
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/openai/openai-go/v3"
+	"github.com/tianniu-ai/tianniu/pkg/agent/context"
+	"github.com/tianniu-ai/tianniu/pkg/agent/llm"
+	"github.com/tianniu-ai/tianniu/pkg/agent/mcp"
+	"github.com/tianniu-ai/tianniu/pkg/agent/memory"
+	"github.com/tianniu-ai/tianniu/pkg/agent/tool"
+	"github.com/tianniu-ai/tianniu/pkg/repository"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 type Manager struct {

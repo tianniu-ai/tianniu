@@ -10,11 +10,11 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin/binding"
-	"github.com/liyue201/tian-niu/pkg/agent"
-	"github.com/liyue201/tian-niu/pkg/auth"
-	"github.com/liyue201/tian-niu/pkg/repository"
-	"github.com/liyue201/tian-niu/pkg/service"
 	log "github.com/sirupsen/logrus"
+	"github.com/tianniu-ai/tianniu/pkg/agent"
+	"github.com/tianniu-ai/tianniu/pkg/auth"
+	"github.com/tianniu-ai/tianniu/pkg/repository"
+	"github.com/tianniu-ai/tianniu/pkg/service"
 )
 
 type Server struct {

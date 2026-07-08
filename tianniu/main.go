@@ -8,17 +8,17 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
-	"github.com/liyue201/tian-niu/pkg/agent"
-	context2 "github.com/liyue201/tian-niu/pkg/agent/context"
-	"github.com/liyue201/tian-niu/pkg/agent/mcp"
-	"github.com/liyue201/tian-niu/pkg/agent/memory"
-	"github.com/liyue201/tian-niu/pkg/agent/tool"
-	"github.com/liyue201/tian-niu/pkg/repository"
-	"github.com/liyue201/tian-niu/pkg/server"
-	"github.com/liyue201/tian-niu/pkg/shared"
-	_ "github.com/liyue201/tian-niu/pkg/shared/log"
-	"github.com/liyue201/tian-niu/pkg/storage/leveldb_storage"
 	log "github.com/sirupsen/logrus"
+	"github.com/tianniu-ai/tianniu/pkg/agent"
+	context2 "github.com/tianniu-ai/tianniu/pkg/agent/context"
+	"github.com/tianniu-ai/tianniu/pkg/agent/mcp"
+	"github.com/tianniu-ai/tianniu/pkg/agent/memory"
+	"github.com/tianniu-ai/tianniu/pkg/agent/tool"
+	"github.com/tianniu-ai/tianniu/pkg/repository"
+	"github.com/tianniu-ai/tianniu/pkg/server"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
+	_ "github.com/tianniu-ai/tianniu/pkg/shared/log"
+	"github.com/tianniu-ai/tianniu/pkg/storage/leveldb_storage"
 )
 
 type AppConfig struct {

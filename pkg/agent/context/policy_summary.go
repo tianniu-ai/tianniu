@@ -3,9 +3,9 @@ package context
 import (
 	"context"
 
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/openai/openai-go/v3"
 	log "github.com/sirupsen/logrus"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 type SummaryPolicy struct {

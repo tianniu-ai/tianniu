@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/liyue201/tian-niu/pkg/repository"
-	"github.com/liyue201/tian-niu/pkg/vo"
+	"github.com/tianniu-ai/tianniu/pkg/repository"
+	"github.com/tianniu-ai/tianniu/pkg/vo"
 )
 
 // POST /user/register

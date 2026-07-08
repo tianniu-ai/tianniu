@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/liyue201/tian-niu/pkg/vo"
+	"github.com/tianniu-ai/tianniu/pkg/vo"
 )
 
 // POST /conversation

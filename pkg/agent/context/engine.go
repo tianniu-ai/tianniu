@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/liyue201/tian-niu/pkg/agent/memory"
-	"github.com/liyue201/tian-niu/pkg/repository"
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/openai/openai-go/v3"
 	log "github.com/sirupsen/logrus"
+	"github.com/tianniu-ai/tianniu/pkg/agent/memory"
+	"github.com/tianniu-ai/tianniu/pkg/repository"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 type messageWrap struct {

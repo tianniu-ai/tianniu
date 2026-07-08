@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/liyue201/tian-niu/pkg/shared"
-	"github.com/liyue201/tian-niu/pkg/storage"
 	"github.com/openai/openai-go/v3"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
+	"github.com/tianniu-ai/tianniu/pkg/storage"
 )
 
 type OffloadPolicy struct {

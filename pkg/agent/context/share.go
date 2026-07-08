@@ -3,7 +3,7 @@ package context
 import (
 	"log"
 
-	"github.com/liyue201/tian-niu/pkg/shared"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 	"github.com/tiktoken-go/tokenizer"
 )
 

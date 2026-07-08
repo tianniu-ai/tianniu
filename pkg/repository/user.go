@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/liyue201/tian-niu/pkg/model"
+	"github.com/tianniu-ai/tianniu/pkg/model"
 )
 
 func (r *Repository) GetUserByUsername(username string) (*model.User, error) {

@@ -8,11 +8,11 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/liyue201/tian-niu/pkg/agent/tool"
-	"github.com/liyue201/tian-niu/pkg/shared"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/openai/openai-go/v3"
 	shared2 "github.com/openai/openai-go/v3/shared"
+	"github.com/tianniu-ai/tianniu/pkg/agent/tool"
+	"github.com/tianniu-ai/tianniu/pkg/shared"
 )
 
 type Client struct {
