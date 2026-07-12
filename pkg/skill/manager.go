@@ -146,6 +146,59 @@ func (m *Manager) InstallUserSkill(userID, skillPath string, options InstallOpti
 	return skill, nil
 }
 
+func (m *Manager) InstallUserSkillFromContent(userID, content string, options InstallOptions) (*Skill, error) {
+	if userID == "" {
+		return nil, fmt.Errorf("user ID is required")
+	}
+
+	skillDef, skillContent, err := parseSkillMD(content)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse skill definition: %w", err)
+	}
+
+	existingSkill, _ := m.store.GetSkillForUser(userID, skillDef.Name)
+	if existingSkill != nil && existingSkill.Type == SkillTypeUser && !options.Force {
+		return nil, fmt.Errorf("user skill '%s' is already installed", skillDef.Name)
+	}
+
+	destPath := filepath.Join(m.skillsDir, "users", userID, skillDef.Name)
+	if err := os.MkdirAll(destPath, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create skill directory: %w", err)
+	}
+
+	skillMDPath := filepath.Join(destPath, "SKILL.md")
+	if err := os.WriteFile(skillMDPath, []byte(content), 0644); err != nil {
+		return nil, fmt.Errorf("failed to write SKILL.md: %w", err)
+	}
+
+	skill := &Skill{
+		ID:          uuid.NewString(),
+		Name:        skillDef.Name,
+		Description: skillDef.Description,
+		Homepage:    skillDef.Homepage,
+		Metadata:    skillDef.Metadata,
+		Status:      SkillStatusEnabled,
+		Type:        SkillTypeUser,
+		UserID:      userID,
+		InstalledAt: time.Now(),
+		UpdatedAt:   time.Now(),
+		Path:        destPath,
+		Definition:  skillDef,
+		Content:     skillContent,
+	}
+
+	if existingSkill != nil && existingSkill.Type == SkillTypeUser {
+		skill.ID = existingSkill.ID
+	}
+
+	if err := m.store.Save(skill); err != nil {
+		return nil, fmt.Errorf("failed to save skill: %w", err)
+	}
+
+	log.Infof("User skill '%s' installed successfully for user '%s'", skill.Name, userID)
+	return skill, nil
+}
+
 func (m *Manager) Uninstall(skillID string, options UninstallOptions) error {
 	skill, err := m.store.GetByID(skillID)
 	if err != nil {
