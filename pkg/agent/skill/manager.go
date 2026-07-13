@@ -161,16 +161,6 @@ func (m *Manager) InstallUserSkillFromContent(userID, content string, options In
 		return nil, fmt.Errorf("user skill '%s' is already installed", skillDef.Name)
 	}
 
-	destPath := filepath.Join(m.skillsDir, "users", userID, skillDef.Name)
-	if err := os.MkdirAll(destPath, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create skill directory: %w", err)
-	}
-
-	skillMDPath := filepath.Join(destPath, "SKILL.md")
-	if err := os.WriteFile(skillMDPath, []byte(content), 0644); err != nil {
-		return nil, fmt.Errorf("failed to write SKILL.md: %w", err)
-	}
-
 	skill := &Skill{
 		ID:          uuid.NewString(),
 		Name:        skillDef.Name,
@@ -182,7 +172,7 @@ func (m *Manager) InstallUserSkillFromContent(userID, content string, options In
 		UserID:      userID,
 		InstalledAt: time.Now(),
 		UpdatedAt:   time.Now(),
-		Path:        destPath,
+		Path:        "",
 		Definition:  skillDef,
 		Content:     skillContent,
 	}
@@ -205,8 +195,10 @@ func (m *Manager) Uninstall(skillID string, options UninstallOptions) error {
 		return err
 	}
 
-	if err := os.RemoveAll(skill.Path); err != nil {
-		return fmt.Errorf("failed to remove skill directory: %w", err)
+	if skill.Path != "" {
+		if err := os.RemoveAll(skill.Path); err != nil {
+			return fmt.Errorf("failed to remove skill directory: %w", err)
+		}
 	}
 
 	if err := m.store.Delete(skillID); err != nil {

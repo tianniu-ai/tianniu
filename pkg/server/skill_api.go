@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tianniu-ai/tianniu/pkg/skill"
+	skill2 "github.com/tianniu-ai/tianniu/pkg/agent/skill"
 )
 
 type SkillAPI struct {
-	skillManager *skill.Manager
+	skillManager *skill2.Manager
 }
 
-func NewSkillAPI(skillManager *skill.Manager) *SkillAPI {
+func NewSkillAPI(skillManager *skill2.Manager) *SkillAPI {
 	return &SkillAPI{skillManager: skillManager}
 }
 
@@ -114,7 +114,7 @@ func (api *SkillAPI) installUserSkill(c *gin.Context) {
 		return
 	}
 
-	options := skill.InstallOptions{Force: force}
+	options := skill2.InstallOptions{Force: force}
 	installedSkill, err := api.skillManager.InstallUserSkillFromContent(userID, string(content), options)
 	if err != nil {
 		respondError(c, StatusInternalServerError, err)
@@ -135,7 +135,7 @@ func (api *SkillAPI) uninstallSkill(c *gin.Context) {
 		return
 	}
 
-	options := skill.UninstallOptions{KeepConfig: req.KeepConfig}
+	options := skill2.UninstallOptions{KeepConfig: req.KeepConfig}
 	if err := api.skillManager.Uninstall(id, options); err != nil {
 		respondError(c, StatusInternalServerError, err)
 		return

@@ -13,12 +13,12 @@ import (
 	context2 "github.com/tianniu-ai/tianniu/pkg/agent/context"
 	"github.com/tianniu-ai/tianniu/pkg/agent/mcp"
 	"github.com/tianniu-ai/tianniu/pkg/agent/memory"
+	skill2 "github.com/tianniu-ai/tianniu/pkg/agent/skill"
 	"github.com/tianniu-ai/tianniu/pkg/agent/tool"
 	"github.com/tianniu-ai/tianniu/pkg/repository"
 	"github.com/tianniu-ai/tianniu/pkg/server"
 	"github.com/tianniu-ai/tianniu/pkg/shared"
 	_ "github.com/tianniu-ai/tianniu/pkg/shared/log"
-	"github.com/tianniu-ai/tianniu/pkg/skill"
 )
 
 type AppConfig struct {
@@ -88,9 +88,9 @@ func main() {
 		skillsDir = "skills"
 	}
 
-	skillStore := skill.NewSQLSkillStore(db)
+	skillStore := skill2.NewSQLSkillStore(db)
 
-	skillManager := skill.NewManager(skillStore, skillsDir)
+	skillManager := skill2.NewManager(skillStore, skillsDir)
 	if err := skillManager.LoadInstalledSkills(); err != nil {
 		log.Errorf("Failed to load installed skills: %v", err)
 	}

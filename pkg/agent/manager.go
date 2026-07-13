@@ -9,10 +9,10 @@ import (
 	"github.com/tianniu-ai/tianniu/pkg/agent/llm"
 	"github.com/tianniu-ai/tianniu/pkg/agent/mcp"
 	"github.com/tianniu-ai/tianniu/pkg/agent/memory"
+	skill2 "github.com/tianniu-ai/tianniu/pkg/agent/skill"
 	"github.com/tianniu-ai/tianniu/pkg/agent/tool"
 	"github.com/tianniu-ai/tianniu/pkg/repository"
 	"github.com/tianniu-ai/tianniu/pkg/shared"
-	"github.com/tianniu-ai/tianniu/pkg/skill"
 )
 
 type Manager struct {
@@ -24,7 +24,7 @@ type Manager struct {
 	mcpClients   []*mcp.Client
 	policies     []context.Policy
 	memory       memory.Memory
-	skillManager *skill.Manager
+	skillManager *skill2.Manager
 
 	agents map[string]*Agent
 	sync.RWMutex
@@ -38,7 +38,7 @@ func NewManager(
 	mcpClients []*mcp.Client,
 	policies []context.Policy,
 	memory memory.Memory,
-	skillManager *skill.Manager) *Manager {
+	skillManager *skill2.Manager) *Manager {
 	manger := &Manager{
 		repo:         repo,
 		modelConf:    modelConf,
@@ -95,11 +95,11 @@ func (m *Manager) loadSkillTools(userId string) []tool.Tool {
 
 	var tools []tool.Tool
 	for _, s := range skills {
-		if s.Status != skill.SkillStatusEnabled {
+		if s.Status != skill2.SkillStatusEnabled {
 			log.Debugf("skill '%s' is not enabled, skipping", s.Name)
 			continue
 		}
-		skillTool := skill.NewSkillTool(s, skill.SkillToolConfig{})
+		skillTool := skill2.NewSkillTool(s, skill2.SkillToolConfig{})
 		tools = append(tools, skillTool)
 		log.Debugf("added skill tool '%s' for user '%s'", skillTool.ToolName(), userId)
 	}
