@@ -221,8 +221,11 @@ tianniu/
 
 ## 📚 Documentation
 
+For comprehensive documentation, see the [Documentation Hub](doc/README.md).
+
 | Document | Description |
 |----------|-------------|
+| `doc/README.md` | Documentation entry point |
 | `doc/overview.md` | System overview and design principles |
 | `doc/architecture.md` | High-level architecture design |
 | `doc/agent_module.md` | Agent and context engine design |
